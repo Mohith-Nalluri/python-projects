@@ -1,1 +1,89 @@
+from os import system
+from pickle import TRUE
+import random                                                                            # code started by importing required libraries
+import smtplib
+import time
+import re
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
+
+
+def send_otp(user_email,generated_otp):
+
+  try:
+    receiver_email = user_email
+    server = smtplib.SMTP('smtp.gmail.com', 587)
+    server.starttls()
+    server.login('rockymaxxfire007@gmail.com','jycg znco dtld juum')                                       # app passsword is used
+    msg = MIMEMultipart()
+    msg['From'] = 'rockymaxxfire007@gmail.com'
+    msg['To'] = 'moksha1481@gmail.com'
+    msg['Subject'] = "OTP VERIFICATION"
+    body = "OTP For Verification is " + generated_otp
+    msg.attach(MIMEText(body, 'plain'))
+    text = msg.as_string()
+    server.sendmail("rockymaxxfire007@gmail.com", receiver_email, text)
+    print("Mail sent Successfully")
+
+
+
+  except Exception as e:
+    print(f"Error while sending mail : {e}")
+
+  finally:
+    server.quit()
+
+
+def verify_otp(generated_otp,entered_otp):
+  return generated_otp==entered_otp
+
+
+def generateotp():
+  x = "".join([str(random.randint(0,9)) for _ in range(6)])
+  return x
+
+def getuser_otp():
+  x = input("Enter the otp received in email: ")
+  return x
+
+def otp_verificaiton_system():
+  user_email = input("Enter User Email Address: ")
+  pattern = r'^[a-zA-Z0-9_.+-]+@gmail.[a-zA-Z0-9-.]+$'
+
+  if re.match(pattern,user_email):                                                          # checking for valid email entered or not  (checking for google mails as of unit testing but real pattern is  r'^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$'
+    generated_otp = generateotp()
+    send_otp(user_email,generated_otp)
+    otp_generated_time = time.time()                                                         # record the time when OTP was sent
+
+    for attempt in range(3):                                                                 # Allow 3 attempts
+        user_otp = getuser_otp()
+
+                                                                                           # Check if OTP is expired (60 seconds validity)
+        current_time = time.time()
+        if current_time - otp_generated_time > 60:
+            print("OTP expired! Please request a new one.")
+            otp_verificaiton_system()
+
+        if verify_otp(generated_otp, user_otp):
+            print("Access Granted ")
+            return
+        else:
+            print(f"Incorrect OTP Entered. Attempts left: {2 - attempt}")
+            if attempt==2:
+              otp_verificaiton_system()
+  else:
+    print("Wrong email entered , Please enter correct EmailId")
+    otp_verificaiton_system()
+
+
+
+
+
+
+
+
+
+if __name__=="__main__":
+  otp_verificaiton_system()
+
 
